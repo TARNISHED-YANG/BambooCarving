@@ -10,11 +10,11 @@ export default defineConfig({
   base: './' , // 使用相对路径，解决 GitHub Pages 资源 404
   plugins: [
     vue(),
-    vueDevTools(),
   ],
+  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
-  },
+    }
+  }
 })
