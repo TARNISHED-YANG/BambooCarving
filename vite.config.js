@@ -7,11 +7,10 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './' , // 使用相对路径，解决 GitHub Pages 资源 404
+  base: '/BambooCarving/' , // 使用相对路径，解决 GitHub Pages 资源 404
   plugins: [
     vue(),
   ],
-  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
