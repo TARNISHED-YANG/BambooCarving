@@ -14,7 +14,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "vue": "^3.5.18"
+    "@vueuse/core": "^13.7.0",
+    "gsap": "^3.13.0",
+    "motion-v": "^1.7.0",
+    "vue": "^3.5.18",
+    "vue-router": "4"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
