@@ -18,10 +18,10 @@
     top:0;
     left:0;
     width:100%;
-    height: 30px;
+    height: 50px;
     background-color: black;
     color: white;
-    padding:10px 20px;
+    padding:0px 0px;
     z-index:100;
 }
 .NavBar ul{
@@ -29,6 +29,9 @@
     margin:0;
     padding:0;
     display:flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
     gap:200px;
 }
 .NavBar a{

@@ -1,15 +1,13 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+// import vueDevTools from 'vite-plugin-vue-devtools' // 可选
 
-
-// https://vite.dev/config/
 export default defineConfig({
-  base: '/BambooCarving/' , // 使用相对路径，解决 GitHub Pages 资源 404
+  base: '/BambooCarving/',
   plugins: [
     vue(),
+    // vueDevTools(), // 如果需要调试工具
   ],
   resolve: {
     alias: {
