@@ -4,6 +4,7 @@
             <li><router-link to="/">测试</router-link></li>
             <li><router-link to="/lab">实验室</router-link></li>
             <li><router-link to="/show">展示</router-link></li>
+            <li><router-link to="/history">历史渊源</router-link></li>
         </ul>
     </nav>
 </template>
