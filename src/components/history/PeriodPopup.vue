@@ -1,4 +1,4 @@
-<!-- 这是多余作品的弹窗组件，点击查看更多显示 -->
+<!-- 这是多余作品的弹窗组件，点击查看更多显示，即ShowMore的子组件 -->
 <script setup>
 const props = defineProps({
   period: {
@@ -67,6 +67,8 @@ const handleClose = () => {
   overflow: hidden;
   z-index: 100;
   box-sizing: border-box;
+  border: 0.5px solid rgba(255,255,255,0.8);
+  border-radius: 4px;
 }
 .content_part {
   position: relative;
