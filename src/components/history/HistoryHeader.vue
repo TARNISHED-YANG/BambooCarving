@@ -53,7 +53,7 @@ onMounted(() => {
   position: relative;
   width: 100vw;
   /* max-width: 1440px; 宽屏也不留空隙*/
-  height: 61.46vw; /*885px*/
+  height: calc(100vw * 177/288); /*885px*/
   overflow: hidden;
   /* margin: 0 auto; 水平居中 */
 }
@@ -90,29 +90,29 @@ onMounted(() => {
 /* 所有元素用绝对定位控制垂直距离，继承Flex的水平居中 */
 .sub_title {
   position: absolute;
-  top: 8.4vw; /* 距content_part顶部121px */
-  width: auto;
-  height: 100px;
+  top: 14.3503%;
+  height: auto;
+  width: 12.9167%;
 }
 .main_title {
   position: absolute;
-  top: 22.15vw; /* 距content_part顶部319px */
-  width: auto;
-  height: 250px;
+  top: 38.08%;
+  width: 53.75%;
+  height: auto;
   opacity: 0;
   transition: opacity 2s ease-in-out;
 }
 .english_title {
   position: absolute;
-  top: 26.18vw;
+  top: 43.164%;
   width: auto;
-  height: 70px;
+  height: 70px;/*英文宽度？*/
 }
 .arrow {
   position: absolute;
-  bottom: 2.88vw;
-  width: auto;
-  height: 120px;
+  bottom: 10.565%;
+  width: 6.8056%;
+  height: auto;
   opacity: 0;
   transition: opacity 2s ease-in-out;
 }

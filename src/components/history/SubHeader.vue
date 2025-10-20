@@ -2,7 +2,6 @@
 defineProps({
   origin: { type: String, required: true },
   celebrity: { type: String, required: true },
-  subImg: { type: String, required: true },
   header_info: {
     type: Object,
     required: true,
@@ -12,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="container"
+  <div class="subhead_container"
     :style="{
       position:'absolute',
       top:y+'px'}"
@@ -23,7 +22,7 @@ defineProps({
       <div class="sub_wrapper">
         <h1 class="main_title">{{ header_info.chiIntro }}</h1>
 
-        <img :src="subImg" alt="角标时间" class="subscript" />
+        <img :src="header_info.subTime" alt="角标时间" class="subscript" />
       </div>
       <p class="eng_intro">{{ header_info.engIntro }}</p>
       <p class="description">{{ header_info.textIntro }}</p>
@@ -44,11 +43,11 @@ defineProps({
   font-family: 'Font3';
   src: url('@/assets/Fonts/细体-思源黑体7号.otf') format('opentype');
 }
-.container {
+.subhead_container {
   left:50%;
   transform:translateX(-50%);
-  width: 83.3vw;/*1200px*/
-  height: 34.7vw;/*500px*/
+  width: calc(100vw*5/6);
+  min-height:auto;
 }
 .small_img {
   position: absolute;
@@ -63,13 +62,13 @@ defineProps({
   right: 0;
 }
 .middle {
-  position: absolute;
-  top: 50%;
+  position: relative;
+  top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   text-align: center;
   width: 80%;
-  height:100%;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -79,8 +78,8 @@ defineProps({
 /* 定位角标的容器 */
 .sub_wrapper {
   position: relative;
-  display: flex;
-  justify-content: center;
+  display:grid;
+  place-items:center;
 }
 .main_title {
   color:white;
@@ -89,11 +88,12 @@ defineProps({
   writing-mode: vertical-rl;
   margin: 0;
   font-family: 'Font1';
+  font-weight: 400;
 }
 .subscript {
-  position: absolute;
-  bottom: -10px; /* 超出主标题底部一点 */
-  right: -20px; /* 超出主标题左侧一点（竖排文字右侧对应横排左侧） */
+  position:absolute;
+  bottom: 0;
+  right:-25px;
   width: 30px;
   height: 30px;
 }
@@ -103,14 +103,15 @@ defineProps({
   font-size: 26px;
   margin: 0;
   white-space: pre-line; /*使换行符生效*/
+  line-height: 25px;
   font-family: 'Font2';
 }
 
 .description {
   color:white;
   font-size: 12px;
-  line-height: 1.8;
-  max-width: 500px;
+  line-height: 18px;
+  width:495px;
   margin: 0;
   text-indent: 2em;
   text-align: justify;

@@ -90,21 +90,21 @@ onMounted(() => {
 
 /* 左侧布局样式 */
 .rect-left {
-  width: 803px;
-  height: 288px;
+  width: calc(100vw * 803 / 1440);
+  height: calc(100vw * 0.2);
   display: flex;
   align-items: flex-end;
 }
 
 .rect-left .time_img {
   margin-right: 15px;
-  width: 164.7px;
+  width: 20.51%;
   height: auto;
 }
 
 .rect-left .work_img {
   margin-right: 20px;
-  height: 277px;
+  height: 96.18%;
   width: auto;
 }
 
@@ -120,7 +120,7 @@ onMounted(() => {
 .rect-right {
   left: 50%;
   transform: translateX(-50%);
-  height: 400px;
+  min-height:auto;
   display: flex;
   flex-direction: column;
   gap: 35px;
