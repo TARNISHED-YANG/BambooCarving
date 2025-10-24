@@ -1,10 +1,11 @@
 <!-- 这是节点组件，左边用left，右边用right控制组件形态 -->
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-const props = defineProps({
+import { ref , onMounted} from 'vue'
+ defineProps({
   // 位置属性
-  x: { type: Number },
-  y: { type: Number, required: true },
+  x: Number,
+  y: Number,
+  id: Number,
   // 控制组件形态：'left' 或 'right'
   position: { type: String, required: true, validator: (val) => ['left', 'right'].includes(val) },
   // 图片和文本属性
@@ -15,32 +16,14 @@ const props = defineProps({
 })
 
 const rectRef = ref(null)
-const timeImgRef = ref(null)
-const workImgRef = ref(null)
-const nameImgRef = ref(null)
-
+// const timeImgRef = ref(null)
+// const workImgRef = ref(null)
+// const nameImgRef = ref(null)
 onMounted(() => {
+  // 使用 requestAnimationFrame 触发淡入
   setTimeout(() => {
     if (rectRef.value) {
-      rectRef.value.style.opacity = '1'
-    }
-
-    // 右侧布局需要动态计算宽度
-    if (props.position === 'right') {
-      nextTick(() => {
-        // 获取各图片的宽度
-        const timeImgWidth = timeImgRef.value?.offsetWidth || 0
-        const workImgWidth = workImgRef.value?.offsetWidth || 0
-        const nameImgWidth = nameImgRef.value?.offsetWidth || 0
-        // 图片之间的间距
-        const gap = 15
-        // 计算总宽度
-        const totalWidth = timeImgWidth + workImgWidth + nameImgWidth + gap * 2
-        // 设置组件宽度
-        if (rectRef.value) {
-          rectRef.value.style.width = totalWidth + 'px'
-        }
-      })
+      rectRef.value.style.opacity = 1
     }
   }, 50)
 })
@@ -54,6 +37,9 @@ onMounted(() => {
     :style="{
       top: y + 'px',
       ...(position === 'left' ? { left: x + 'px' } : {}),
+      opacity:0,
+      transition: 'opacity 1s ease',
+      zIndex:10
     }"
   >
     <!-- 左侧布局结构 -->
@@ -81,8 +67,8 @@ onMounted(() => {
 <style scoped>
 .rect {
   position: absolute;
-  opacity: 0;
-  transition: opacity 1s ease;
+  /* opacity: 0;
+  transition: opacity 1s ease; */
   z-index: 10;
   padding: 0;
   box-sizing: border-box;
@@ -124,12 +110,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 35px;
+  width:max-content;
+  max-width: 100%;
 }
 
 .rect-right .images_part {
   display: flex;
   align-items: flex-end;
   gap: 15px;
+  width:max-content;
 }
 
 .rect-right .time_img {
@@ -156,5 +145,8 @@ onMounted(() => {
   color: #fff;
   margin: 0;
   white-space: pre-line; /* 使换行符生效 */
+}
+.rect-right .cele_intro {
+  max-width: calc(100vw * 0.35);/*这里后续还是要改动的，导致最后不那么精致*/
 }
 </style>

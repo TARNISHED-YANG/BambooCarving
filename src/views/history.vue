@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted,onUnmounted,ref,reactive} from 'vue';
 import HistoryHeader from '@/components/history/HistoryHeader.vue'
 import bImg1 from '@/assets/history/header/background_1.png'
 import bImg2 from '@/assets/history/header/background_2.png'
@@ -275,13 +276,14 @@ import tImgRight6 from '@/assets/history/node/headline6.png'
 import wImgRight6 from '@/assets/history/nodeT2/image6.jpg'
 import nImgRight6 from '@/assets/history/nodeT2/subheading6.png'
 
-// 左侧节点数据
-const leftNodes = [
+//这里y是最上端到达svg顶部的距离，而不是到页面最上端的距离
+const allNodes = [
   {
     id: 1,
     position: 'left',  // 指定为左侧布局
     x: 100,
-    y: 1800,//创始1
+    y: 915,//创始1
+    prog:0.1,
     TimeImg: tImgLeft1,
     WorkImg: wImgLeft1,
     NameImg: nImgLeft1,
@@ -290,56 +292,9 @@ const leftNodes = [
   },
   {
     id: 2,
-    position: 'left',  // 指定为左侧布局
-    x: 100,
-    y: 8400,//高峰2
-    TimeImg: tImgLeft2,
-    WorkImg: wImgLeft2,
-    NameImg: nImgLeft2,
-    CeleIntro:
-      '清代乾隆时期，著名学者钱大昕与竹人周颢结为忘年交，又续文人与竹人友谊的一段佳话。周颢比钱大昕长43岁，但十分喜欢钱大昕，俩人交流过竹刻艺术，也引发了钱大昕对竹刻的浓厚兴趣，在读书著述之余，钱大昕也操刀刻竹，作品颇为精到传神。周颢逝世后，钱大昕异常悲痛，回忆自己与周颢的深厚友谊，写了 《周山人传》一文，为周颢留下了生动而详实的生平传略。',
-  },
-  {
-    id: 3,
-    position: 'left',  // 指定为左侧布局
-    x: 100,
-    y: 4600,//活跃2
-    TimeImg: tImgLeft3,
-    WorkImg: wImgLeft3,
-    NameImg: nImgLeft3,
-    CeleIntro:
-      '“嘉定四先生”之一的 娄坚，也同竹人有密切的关系。娄坚为明万历贡生，诗文俱佳，尤精于书法，称为 “天下绝妙”。娄坚比朱缨小24岁，两人亦师亦友。朱缨十分赏识娄坚的好学和为人， “以小友接之”，少年娄坚经常出入朱缨家问学。朱缨逝世三十年后，娄坚以深情的笔调撰写了 《先友朱清甫先生传》一文，记述了两人的深情厚意。',
-  },
-  {
-    id: 4,
-    position: 'left',  // 指定为左侧布局
-    x: 100,
-    y: 5800,//全盛1
-    TimeImg: tImgLeft4,
-    WorkImg: wImgLeft4,
-    NameImg: nImgLeft4,
-    CeleIntro:
-      '吴之璠，字鲁珍，号东海道人，江苏嘉定人，继三朱之后，吴之璠是嘉定派竹刻的第一高手。是康熙前期的竹雕名家。吴之璠擅长圆雕、浮雕等各种技法，早年师法三朱，晚年变法，仿洛阳龙门石刻的浅浮雕，首用薄地阳文刻竹。他的作品传世不多，但件件都是精品，时人称之为“鬼斧神工”，乾隆皇帝看了欣喜万分，亲笔在他的作品上题诗：“竹刻由来说鲁珍，藏锋写像传有神。技哉刀笔精神可，于吏吾当斥此人。”吴之璠开创的“薄地阳文”丰富了嘉定竹刻技法，从他学习的后人甚多，最著名的为其女婿朱文右，刻工也精美传神。此外，还有王之羽，也为吴之璠亲手所教，王之羽的作品有乃师之风格，王氏后人刻竹者甚多，王鉴、王质、王玘、王梅邻均为著名竹人，继承了吴之璠的风格。',
-  },
-  {
-    id: 5,
-    position: 'left',  // 指定为左侧布局
-    x: 100,
-    y: 9600,//衰落1
-    TimeImg: tImgLeft5,
-    WorkImg: wImgLeft5,
-    NameImg: nImgLeft5,
-    CeleIntro:
-      '晚清秀才程庭鹭、程祖庆父子，都擅长书画篆刻，也精于竹刻。嘉定竹刻博物馆藏有程庭鹭的 “松风琴趣图臂搁”，高古简洁，极具文人笔墨韵味。秀才赵鼎奎、周次咸等都是名噪一时的竹刻好手。',
-  },
-]
-
-// 右侧节点数据
-const rightNodes = [
-  {
-    id: 1,
     position: 'right',  // 指定为右侧布局
-    y: 2500,//创始2
+    y: 1615,//创始2
+    prog:0.15,
     TimeImg: tImgRight1,
     WorkImg: wImgRight1,
     NameImg: nImgRight1,
@@ -347,19 +302,10 @@ const rightNodes = [
       '朱缨，号小松，胜父一筹，绘画造诣更高，善圆雕，擅长竹刻神像佛像师法吴道子，1966年上海宝山县明朱守成墓，出土小松款刘阮入天台香筒，为可信度高之原刻作品，活跃于明嘉靖晚期到隆庆。',
   },
   {
-    id: 2,
-    position: 'right',  // 指定为右侧布局
-    y: 7700,//高峰1
-    TimeImg: tImgRight2,
-    WorkImg: wImgRight2,
-    NameImg: nImgRight2,
-    CeleIntro:
-      '这个时期的领军人物是周颢。周颢传世作品件件都是精品。与他同时代的著名学者钱大昕在《周山人传》一文中说周颢“用刀如用笔，不假稿本，自成丘壑，其皴法浓淡坳突，生动浑成，”“松壑云泉图笔筒”、“兰花秘阁”都是绝顶佳品。',
-  },
-  {
     id: 3,
     position: 'right',  // 指定为右侧布局
-    y: 3800,//活跃1
+    y: 2915,//活跃1
+    prog:0.28,
     TimeImg: tImgRight3,
     WorkImg: wImgRight3,
     NameImg: nImgRight3,
@@ -368,8 +314,33 @@ const rightNodes = [
   },
   {
     id: 4,
+    position: 'left',  // 指定为左侧布局
+    x: 100,
+    y: 3715,//活跃2
+    prog:0.33,
+    TimeImg: tImgLeft3,
+    WorkImg: wImgLeft3,
+    NameImg: nImgLeft3,
+    CeleIntro:
+      '“嘉定四先生”之一的 娄坚，也同竹人有密切的关系。娄坚为明万历贡生，诗文俱佳，尤精于书法，称为 “天下绝妙”。娄坚比朱缨小24岁，两人亦师亦友。朱缨十分赏识娄坚的好学和为人， “以小友接之”，少年娄坚经常出入朱缨家问学。朱缨逝世三十年后，娄坚以深情的笔调撰写了 《先友朱清甫先生传》一文，记述了两人的深情厚意。',
+  },
+  {
+    id: 5,
+    position: 'left',  // 指定为左侧布局
+    x: 100,
+    y: 4915,//全盛1
+    prog:0.43,
+    TimeImg: tImgLeft4,
+    WorkImg: wImgLeft4,
+    NameImg: nImgLeft4,
+    CeleIntro:
+      '吴之璠，字鲁珍，号东海道人，江苏嘉定人，继三朱之后，吴之璠是嘉定派竹刻的第一高手。是康熙前期的竹雕名家。吴之璠擅长圆雕、浮雕等各种技法，早年师法三朱，晚年变法，仿洛阳龙门石刻的浅浮雕，首用薄地阳文刻竹。他的作品传世不多，但件件都是精品，时人称之为“鬼斧神工”，乾隆皇帝看了欣喜万分，亲笔在他的作品上题诗：“竹刻由来说鲁珍，藏锋写像传有神。技哉刀笔精神可，于吏吾当斥此人。”吴之璠开创的“薄地阳文”丰富了嘉定竹刻技法，从他学习的后人甚多，最著名的为其女婿朱文右，刻工也精美传神。此外，还有王之羽，也为吴之璠亲手所教，王之羽的作品有乃师之风格，王氏后人刻竹者甚多，王鉴、王质、王玘、王梅邻均为著名竹人，继承了吴之璠的风格。',
+  },
+  {
+    id: 6,
     position: 'right',  // 指定为右侧布局
-    y: 6450,//全盛2
+    y: 5565,//全盛2
+    prog:0.48,
     TimeImg: tImgRight4,
     WorkImg: wImgRight4,
     NameImg: nImgRight4,
@@ -377,26 +348,141 @@ const rightNodes = [
       '封锡爵、封锡禄、封锡璋三兄弟，是与吴之璠同时代的竹刻大家，号称“封氏三鼎足”，他们都精于圆雕人物，以封锡禄成就最高。后来，他与其弟封锡璋被康熙皇帝召入内廷为皇家刻制作品。封锡禄的圆雕“罗汉像”、“狮子戏球”，都是不可多得的艺术珍品。金元钰在《竹人录》中除了为“封氏三鼎足”列传外，还为封氏家族中的封颖谷、封始镐、封始豳、封始岐立传。此外，又有封文官、封品官、封元官、封云生、封小姐等名列《竹人录》，他们都是封氏后人。封小姐“工刻蟾蜍，当时以一蟾蜍易银一两”，封氏家族把圆雕艺术推向极致。这个时期，王易、周乃始、王屺等也是有相当实力的竹人。',
   },
   {
-    id: 5,
+    id: 7,
     position: 'right',  // 指定为右侧布局
-    y: 11500,//式微
-    TimeImg: tImgRight5,
-    WorkImg: wImgRight5,
-    NameImg: nImgRight5,
+    y: 6815,//高峰1
+    prog:0.6,
+    TimeImg: tImgRight2,
+    WorkImg: wImgRight2,
+    NameImg: nImgRight2,
     CeleIntro:
-      '至民国时期，尽管竹刻已经式微，仍有不少文人雅士参与竹刻，流风遗韵，代代不绝。如 万一鹏，精于书画，亦善竹刻，所刻 “竹叶络纬笔筒”藏于嘉定竹刻博物馆，嘉定乡贤 胡厥文先生曾在笔筒题写了长段跋文，称之为 “瑰奇古茂，精雅绝俗。',
+      '这个时期的领军人物是周颢。周颢传世作品件件都是精品。与他同时代的著名学者钱大昕在《周山人传》一文中说周颢“用刀如用笔，不假稿本，自成丘壑，其皴法浓淡坳突，生动浑成，”“松壑云泉图笔筒”、“兰花秘阁”都是绝顶佳品。',
   },
   {
-    id: 6,
+    id: 8,
+    position: 'left',  // 指定为左侧布局
+    x: 100,
+    y: 7515,//高峰2
+    prog:0.65,
+    TimeImg: tImgLeft2,
+    WorkImg: wImgLeft2,
+    NameImg: nImgLeft2,
+    CeleIntro:
+      '清代乾隆时期，著名学者钱大昕与竹人周颢结为忘年交，又续文人与竹人友谊的一段佳话。周颢比钱大昕长43岁，但十分喜欢钱大昕，俩人交流过竹刻艺术，也引发了钱大昕对竹刻的浓厚兴趣，在读书著述之余，钱大昕也操刀刻竹，作品颇为精到传神。周颢逝世后，钱大昕异常悲痛，回忆自己与周颢的深厚友谊，写了 《周山人传》一文，为周颢留下了生动而详实的生平传略。',
+  },
+  {
+    id: 9,
+    position: 'left',  // 指定为左侧布局
+    x: 100,
+    y: 8715,//衰落1
+    prog:0.76,
+    TimeImg: tImgLeft5,
+    WorkImg: wImgLeft5,
+    NameImg: nImgLeft5,
+    CeleIntro:
+      '晚清秀才程庭鹭、程祖庆父子，都擅长书画篆刻，也精于竹刻。嘉定竹刻博物馆藏有程庭鹭的 “松风琴趣图臂搁”，高古简洁，极具文人笔墨韵味。秀才赵鼎奎、周次咸等都是名噪一时的竹刻好手。',
+  },
+  {
+    id: 10,
     position: 'right',  // 指定为右侧布局
-    y: 10196,//衰落2
+    y: 9311,//衰落2
+    prog:0.8,
     TimeImg: tImgRight6,
     WorkImg: wImgRight6,
     NameImg: nImgRight6,
     CeleIntro:
       '张学海的圆雕令人瞩目，张学海具有创新意识，擅长大件圆雕，他的圆雕大狮子，精气十足，是他的代表作。',
   },
+  {
+    id: 11,
+    position: 'right',  // 指定为右侧布局
+    y: 10615,//式微
+    prog:0.9,
+    TimeImg: tImgRight5,
+    WorkImg: wImgRight5,
+    NameImg: nImgRight5,
+    CeleIntro:
+      '至民国时期，尽管竹刻已经式微，仍有不少文人雅士参与竹刻，流风遗韵，代代不绝。如 万一鹏，精于书画，亦善竹刻，所刻 “竹叶络纬笔筒”藏于嘉定竹刻博物馆，嘉定乡贤 胡厥文先生曾在笔筒题写了长段跋文，称之为 “瑰奇古茂，精雅绝俗。',
+  },
 ]
+const rects = reactive([]) //储存已显示的Node数组
+let maxProgress = 0;
+let speed = 1.05;
+let start_ratio = 0.1;
+const progress = ref(0)
+// // checkpoints与rectParams索引对应，控制每个节点的滚动触发进度
+// const checkpoints = [0.2, 0.4]
+// const imgs = [Renoir1, Renoir2] // 路径上的小图片
+// const shown = [false, false] // 标记节点是否已显示
+
+import Renoir1 from '@/assets/Renoir.jpeg'
+import Renoir2 from '@/assets/Renoir2.jpeg'
+const checkpoints = allNodes.map(node => node.prog) // 根据allNodes动态生成触发进度点
+const imgs = [Renoir1, Renoir2,Renoir1, Renoir2,Renoir1, Renoir2,Renoir1, Renoir2,Renoir1, Renoir2,Renoir1] //路径上
+const shown = reactive(allNodes.map(()=>false))// 标记节点是否已显示
+
+onMounted(() => {
+  const container = document.querySelector('.svg-container')
+  const path = document.getElementById('highlightPath')
+  if (!path) return
+  const pathLength = path.getTotalLength()
+  path.style.strokeDasharray = pathLength
+  path.style.strokeDashoffset = pathLength
+  const onScroll = () => {
+    const rect = path.getBoundingClientRect() //路径的边界矩形
+    const windowHeight = window.innerHeight
+    // const viewportTop = 0
+    const viewportBottom = windowHeight
+    const elementTop = rect.top
+    // const elementBottom = rect.bottom
+    const scrollRange = rect.height + windowHeight
+    const scrolled = viewportBottom - elementTop - windowHeight * start_ratio //计算滚动距离
+    maxProgress = Math.max(scrolled * speed, maxProgress) //更新最大滚动进度
+    progress.value = Math.min(Math.max(maxProgress / scrollRange, 0), 1) //归一化到0-1范围
+    path.style.strokeDashoffset = pathLength * (1 - progress.value)
+        // 遍历每个节点，判断是否达到滚动触发条件
+    checkpoints.forEach((triggerProgress, i) => {
+      if (progress.value >= triggerProgress && !shown[i]) {
+        const currentParam = allNodes[i]
+        // 1. 绘制SVG路径上的小图片（按pathRatio计算位置）
+        const point = path.getPointAtLength(pathLength * currentParam.prog)
+
+        const img = document.createElement('img')
+        img.style.opacity = 0
+        img.src = imgs[i]
+        img.style.position = 'absolute'
+        img.style.width = '40px'
+        img.style.height = '40px'
+        img.style.left = `${point.x - 20}px`
+        img.style.top = `${point.y - 20}px`
+        img.style.transition = 'opacity 0.7s ease'
+        container.appendChild(img)
+        setTimeout(() => (img.style.opacity = 1), 50)
+
+        // 2. 添加MyRect组件数据（直接使用手动配置的x/y）
+        rects.push({
+          id: currentParam.id,
+          // 直接使用rectParams中自定义的x/y，不再依赖路径点位偏移
+          x: currentParam.x,
+          y: currentParam.y,
+          // 传递其他组件参数
+          position: currentParam.position,
+          TimeImg: currentParam.TimeImg,
+          WorkImg: currentParam.WorkImg,
+          NameImg: currentParam.NameImg,
+          CeleIntro: currentParam.CeleIntro,
+        })
+
+        shown[i] = true // 标记该节点已显示，避免重复添加
+      }
+    })
+  }
+  window.addEventListener('scroll', onScroll)
+  onScroll() //初始化调用一次
+  onUnmounted(() => {
+    window.removeEventListener('scroll', onScroll)
+  })
+})
 </script>
 
 <template>
@@ -411,17 +497,31 @@ const rightNodes = [
         :enTitle="headData.enTitle"
         :arrowIcon="headData.arrowIcon"
       ></HistoryHeader>
-        <SubHeader
-          v-for="header in headers"
-          :key="header.id"
-          :y="header.y"
-          :header_info="header"
-          :origin="subHeadImg.lHead"
-          :celebrity="subHeadImg.rHead"
-        />
-        <!-- 先放这里看效果 -->
+
+      <!-- 这是曲线部分，可能还要改动 -->
+    <div class="svg-container" style="position: relative">
+
+    <!-- 扩展 viewBox 高度到 12000，匹配节点最大 y 坐标 -->
+    <svg viewBox="0 0 1440 11900" xmlns="http://www.w3.org/2000/svg" width="1440" height="11900" class="Path">
+      <!-- 黑色底线：延长路径到 y=12000 -->
+      <path
+        d="M800,50 C50,500 1550,1000 800,1500 C50,2000 1550,2500 800,3000 C50,3500 1550,4000 800,4500 C50,5000 1550,5500 800,6000 C50,6500 1550,7000 800,7500 C50,8000 1550,8500 800,9000 C50,9500 1550,10000 800,10500 C50,11000 1550,11500 800,12000"
+        stroke="black"
+        fill="none"
+        stroke-width="3"
+        id="basePath"
+      />
+      <!-- 橙色高亮路径：同步延长 -->
+      <path
+        d="M800,50 C50,500 1550,1000 800,1500 C50,2000 1550,2500 800,3000 C50,3500 1550,4000 800,4500 C50,5000 1550,5500 800,6000 C50,6500 1550,7000 800,7500 C50,8000 1550,8500 800,9000 C50,9500 1550,10000 800,10500 C50,11000 1550,11500 800,12000"
+        stroke="orange"
+        fill="none"
+        stroke-width="5"
+        id="highlightPath"
+      />
+    </svg>
            <OrbitNode
-            v-for="node in [...leftNodes, ...rightNodes]"
+            v-for="node in rects"
             :key="node.id"
             :position="node.position"
             :x="node.x"
@@ -430,27 +530,19 @@ const rightNodes = [
             :WorkImg="node.WorkImg"
             :NameImg="node.NameImg"
             :CeleIntro="node.CeleIntro"
+
           />
-        <!-- <TrackNode1
-          v-for="node in nodesT1"
-          :key="node.id"
-          :x="node.x"
-          :y="node.y"
-          :TimeImg="node.tImg"
-          :WorkImg="node.wImg"
-          :NameImg="node.nImg"
-          :CeleIntro="node.cIntro"
+           <!-- v-show="progress >= node.prog" -->
+</div>
+
+        <SubHeader
+          v-for="header in headers"
+          :key="header.id"
+          :y="header.y"
+          :header_info="header"
+          :origin="subHeadImg.lHead"
+          :celebrity="subHeadImg.rHead"
         />
-        <TrackNode2
-          v-for="node in nodesT2"
-          :key="node.id"
-          :x="node.x"
-          :y="node.y"
-          :TimeImg="node.tImg"
-          :WorkImg="node.wImg"
-          :NameImg="node.nImg"
-          :CeleIntro="node.cIntro"
-        /> -->
 
       <div class="buttons">
         <ShowMoreBtn
@@ -488,5 +580,11 @@ const rightNodes = [
   margin-top: 1000px; /*待定*/
   /* display: flex;
   flex-direction: column; */
+}
+.svg-container{
+  /* width:100%;
+  display:flex;
+  justify-content:center; */
+  position:relative;
 }
 </style>
