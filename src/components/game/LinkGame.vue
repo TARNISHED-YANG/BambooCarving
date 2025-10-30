@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import fudiao1 from '@/assets/LinkGame/fudiao1.png'
 import fudiao2 from '@/assets/LinkGame/fudiao2.png'
 import fudiao3 from '@/assets/LinkGame/fudiao3.png'
@@ -58,12 +58,38 @@ Object.entries(typeToValues).forEach(([type, values]) => {
 
 const grid = ref([])
 const lastSelectedCell = ref([])
+const shakeCell=ref([])
+const timeSeconds=ref(0)
+let timer=null
+const startTimer=()=>{
+  timer=setInterval(()=>{
+    timeSeconds.value++
+  },1000)
+}
+const formatTime=(seconds)=>{
+  const mins=Math.floor(seconds/60).toString().padStart(2,'0')
+  const secs=(seconds%60).toString().padStart(2,'0')
+  return `${mins}:${secs}`
+}
+const isGridEmpty=()=>{
+  return grid.value.every(row=>{
+    return row.every(cell=>cell===0)
+  })
+}
 const selectCell = (rowIndex, colIndex) => {
   if (lastSelectedCell.value?.length) {
     if (canConnect(lastSelectedCell.value, [rowIndex, colIndex])) {
       console.log('可以连接~~')
       grid.value[lastSelectedCell.value[0]][lastSelectedCell.value[1]] = 0
       grid.value[rowIndex][colIndex] = 0
+      if(isGridEmpty()){
+        clearInterval(timer)
+      }
+    }else{
+      shakeCell.value=[rowIndex,colIndex]
+      setTimeout(()=>{
+        shakeCell.value=[]
+      },500)
     }
     lastSelectedCell.value = []
   } else {
@@ -241,7 +267,13 @@ const randomizeGrid = () => {
 
   grid.value = igrid
 }
-
+const resetGame=()=>{
+  clearInterval(timer)
+  timeSeconds.value=0
+  randomizeGrid()
+  lastSelectedCell.value=[]
+  startTimer()
+}
 // /**
 //  * 动态引入图片
 //  */
@@ -251,10 +283,15 @@ const randomizeGrid = () => {
 
 onMounted(() => {
   randomizeGrid()
+  startTimer()
+})
+onUnmounted(()=>{
+  clearInterval(timer)
 })
 </script>
 
 <template>
+  <div class="link_part">
     <div class="game-board">
 
     <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="row">
@@ -266,31 +303,62 @@ onMounted(() => {
         @click="selectCell(rowIndex, colIndex)"
       >
         <span v-if="!grid[rowIndex][colIndex]"></span>
-        <img v-else :src="getImage(grid[rowIndex][colIndex])" class="cell-image" alt="" />
+        <img v-else :src="getImage(grid[rowIndex][colIndex])" class="cell-image" alt="" :class="{'shake-image':shakeCell[0]===rowIndex&&shakeCell[1]===colIndex}" />
         <div class="cell-halo" v-if="isCellSelected(rowIndex, colIndex)"></div>
       </div>
     </div>
-  </div>
+    </div>
+
+    <div class="game_header">
+
+        <div class="left-column">
+          <div class="main_title">
+            竹艺<br>连连看
+          </div>
+          <div class="time_handle">
+              <span class="time-label">用时：</span>
+              <span class="time-value">{{ formatTime(timeSeconds) }}</span>
+            <span class="reset-btn" @click="resetGame">重置</span>
+          </div>
+          <div class="tip">尝试找出刻法相同的两件作品，可以相互消除</div>
+        </div>
+        <div class="side_title">LINKGAME</div>
+    </div>
+
+</div>
 </template>
 
 <style scoped>
+@font-face {
+  font-family: 'Font1';
+  src: url('@/assets/Fonts/ZiTiQuanXinYiJiXiangSong-2 字体圈欣意吉祥宋 Regular.ttf') format('truetype');
+}
 img {
   width: 100%;
   height: 100%;
 }
+.link_part{
+  width:100vw;
+  height:100vh;
+  position:relative;
+  background-color: black;
+}
 .game-board {
-  width: 100vw;
-  height: 100vh;
-  background: url('@/assets/LinkGame/linkgame_bg.jpg') no-repeat;
-  background-size: cover; /* 改用cover让背景图覆盖整个容器 */
-  display: flex; /* 启用Flex布局 */
-  flex-direction: column; /* 子元素垂直排列 */
+  position:absolute;
+  left:0;
+  top:0;
+  width: 70%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   justify-content: center; /* 垂直居中 */
-  align-items: center; /* 水平居中 */
+  align-items: flex-start;
+  padding-left:10%;
+  box-sizing: border-box;
 }
 .row {
   display: flex;
-  justify-content: center; /* 确保每行内部单元格也水平居中 */
+  justify-content: center;
 }
 .cell {
   width: 100px;
@@ -323,7 +391,6 @@ img {
   z-index: 1;
 }
 
-/* 定义光圈的脉冲动画 */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -337,5 +404,98 @@ img {
     transform: scale(1);
     opacity: 1;
   }
+}
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0) rotateZ(0) scale(1);
+  }
+  20% {
+    transform: translateX(-6px) rotateZ(-3deg) scale(1.02);
+  }
+  40% {
+    transform: translateX(6px) rotateZ(3deg) scale(1.02);
+  }
+  60% {
+    transform: translateX(-4px) rotateZ(-2deg) scale(1.01);
+  }
+  80% {
+    transform: translateX(4px) rotateZ(2deg) scale(1.01);
+  }
+}
+
+.shake-image {
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97); /*  cubic-bezier 增强弹性感 */
+  animation-fill-mode: forwards; /* 动画结束后保持最后一帧状态（避免突然跳回） */
+}
+
+.game_header {
+  position: absolute;
+  bottom: 16%;
+  right: 10%;
+  color: white;
+  font-family: 'Font1';/*统一使用的字体*/
+  font-weight: 400;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 20px;
+  text-align: right;
+}
+
+.main_title {
+  font-size: 100px;
+  line-height: 1.1;
+  margin-bottom: 15px;
+}
+
+.time_handle {
+  display: flex;
+  align-items: flex-end;
+  align-items: baseline;
+}
+
+.time-label {
+  font-size: 14px;
+  margin-right: 10px;
+}
+.time-value{
+  font-size: 40px;
+  margin-right:50px;
+  width:50px;
+  text-align: right;
+}
+
+.reset-btn {
+  font-size: 26px;
+  background-image: url('@/assets/LinkGame/reset_bg.png');
+  background-size:contain;
+  background-color:transparent;
+  background-repeat:no-repeat;
+  background-position:center;
+  color: white;
+  height:35px;
+  width:80px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.tip {
+  font-size: 14px;
+  margin-top:10px;
+  letter-spacing: 1px;
+}
+.side_title {
+  font-size: 40px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 15px;
+  color:rgb(189,211,207);
+  transform: translateY(14px);
 }
 </style>
