@@ -14,7 +14,18 @@ const routes = [
 const router = createRouter({
   // 这里加上仓库名作为基础路径，如果你的仓库名是 my-vue-site，就写 '/my-vue-site/'
   history: createWebHistory('/BambooCarving/'),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    return {
+      left: 0,
+      top: 0,
+      behavior: 'auto',
+    }
+  }//保证每个界面从头开始
 })
 
 export default router

@@ -1,20 +1,8 @@
 <script setup>
 import { onMounted,onUnmounted,ref,reactive} from 'vue';
 import HistoryHeader from '@/components/history/HistoryHeader.vue'
-import bImg1 from '@/assets/history/header/background_1.png'
-import bImg2 from '@/assets/history/header/background_2.png'
-import sTitle from '@/assets/history/header/Subheading_1.png'
-import cTitle from '@/assets/history/header/bigtitle_1.png'
-import eTitle from '@/assets/history/header/bigtitle_2.png'
-import aIcon from '@/assets/history/header/icon_1.png'
-const headData = {
-  backImg1: bImg1,
-  backImg2: bImg2,
-  subTitle: sTitle,
-  mainTitle: cTitle,
-  enTitle: eTitle,
-  arrowIcon: aIcon,
-}
+import historyMainTitle from '@/assets/history/header/bigtitle_1.png'
+
 //传给查看更多按钮部分
 import ShowMoreBtn from '@/components/history/ShowMore.vue'
 import time1 from '@/assets/history/popup/tImg1.png'
@@ -489,14 +477,7 @@ onMounted(() => {
   <div class="history_container">
     <div class="background"></div>
     <div class="content">
-      <HistoryHeader
-        :backImg1="headData.backImg1"
-        :backImg2="headData.backImg2"
-        :subTitle="headData.subTitle"
-        :mainTitle="headData.mainTitle"
-        :enTitle="headData.enTitle"
-        :arrowIcon="headData.arrowIcon"
-      ></HistoryHeader>
+      <HistoryHeader :main-title="historyMainTitle" />
 
       <!-- 这是曲线部分，可能还要改动 -->
     <div class="svg-container" style="position: relative">

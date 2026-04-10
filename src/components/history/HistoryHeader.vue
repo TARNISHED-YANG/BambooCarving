@@ -1,14 +1,16 @@
 <!-- 这是历史渊源部分的开头标题 -->
 <script setup>
-defineProps({
-  backImg1: { type: String, required: true },
-  backImg2: { type: String, required: true },
-  subTitle: { type: String, required: true },
-  mainTitle: { type: String, required: true },
-  enTitle: { type: String, required: true },
-  arrowIcon: { type: String, required: true },
-})
 import { ref, onMounted } from 'vue'
+
+import backImg1 from '@/assets/history/header/background_1.png'
+import backImg2 from '@/assets/history/header/background_2.png'
+import subTitle from '@/assets/history/header/Subheading_1.png'
+import enTitle from '@/assets/history/header/bigtitle_2.png'
+import arrowIcon from '@/assets/history/header/icon_1.png'
+
+defineProps({
+  mainTitle: { type: String, required: true },
+})
 
 const mTitleShow = ref(false)
 const arrowShow = ref(false)
