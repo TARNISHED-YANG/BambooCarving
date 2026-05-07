@@ -1,6 +1,11 @@
 <script setup>
   import NavBar from "./components/NavBar.vue";
-  import { onMounted } from "vue";
+  import { computed, onMounted } from "vue";
+  import { useRoute } from "vue-router";
+
+const route = useRoute();
+const gameRoutes = ["/bamboo-game", "/workshop-game"];
+const showNavBar = computed(() => !gameRoutes.includes(route.path));
 
 onMounted(() => {
   // 引入 SDK
@@ -45,7 +50,7 @@ userInfo: {
 
 <template>
    <div id="app">
-    <NavBar /> 
+    <NavBar v-if="showNavBar" />
     <router-view /> 
   </div>
 </template>

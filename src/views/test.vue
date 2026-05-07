@@ -6,7 +6,6 @@ defineOptions({
 })
 
 import HistoryHeader from '@/components/history/HistoryHeader.vue'
-import LinkGame from '@/components/game/LinkGame.vue'
 
 import pageFooter from '@/assets/part3/background.png'
 import heroTitle from '@/assets/part3/big_title.png'
@@ -18,18 +17,32 @@ import exhibitionText from '@/assets/part3/text.png'
 import exhibitionTitle from '@/assets/part3/title.png'
 import sectionTitle from '@/assets/part3/title_2.png'
 import collectionPreview from '@/assets/part3/资源 51@3x.png'
+import workshopPreview from '@/assets/part3/workshop_cover.png'
+import workshopTitle from '@/assets/part3/workshop_title.png'
 
-const showLinkGame = ref(false)
+const gameEntries = [
+  {
+    to: '/bamboo-game',
+    label: '点击进入竹艺连连看',
+    preview: collectionPreview,
+    imageTitle: gameTitle,
+    titleAlt: '竹艺连连看',
+  },
+  {
+    to: '/workshop-game',
+    label: '点击进入竹艺工坊',
+    preview: workshopPreview,
+    imageTitle: workshopTitle,
+    titleAlt: '竹艺工坊',
+  },
+]
+
 const gameSectionRef = ref(null)
 const gameVisible = ref(false)
 let gameObserver = null
 
 const fadeTargets = ref([])
 let fadeObserver = null
-
-const openLinkGame = () => {
-  showLinkGame.value = true
-}
 
 const setFadeTarget = (el) => {
   if (el && !fadeTargets.value.includes(el)) {
@@ -85,7 +98,11 @@ onBeforeUnmount(() => {
 
     <main class="landing-main">
       <div class="landing-column">
-        <router-link to="/show" class="feature-card" aria-label="进入线上展厅">
+        <a
+          href="https://cloud.chan3d.com/scenes/34SlFzwsRfqmLjIU0IChJU5rZSN/index.html"
+          class="feature-card"
+          aria-label="进入线上展厅"
+        >
           <img :src="exhibitionHall" alt="竹语嘉艺线上展厅" class="feature-card__image" />
 
           <div class="feature-card__overlay">
@@ -102,7 +119,7 @@ onBeforeUnmount(() => {
               :ref="setFadeTarget"
             />
           </div>
-        </router-link>
+        </a>
 
         <img
           :src="exhibitionText"
@@ -118,22 +135,30 @@ onBeforeUnmount(() => {
         >
           <img :src="sectionTitle" alt="竹刻小游戏" class="game-block__section-title" />
 
-          <transition name="game-swap" mode="out-in">
-            <button
-              v-if="!showLinkGame"
-              type="button"
+          <div class="game-block__entries">
+            <router-link
+              v-for="entry in gameEntries"
+              :key="entry.to"
+              :to="entry.to"
               class="game-block__entry"
-              @click="openLinkGame"
-              aria-label="点击进入竹艺连连看"
+              :aria-label="entry.label"
             >
               <div class="game-block__stack">
-                <img :src="collectionPreview" alt="竹刻小游戏预览" class="game-block__preview" />
+                <img :src="entry.preview" :alt="`${entry.titleAlt}预览`" class="game-block__preview" />
                 <img
-                  :src="gameTitle"
-                  alt="竹艺连连看"
+                  v-if="entry.imageTitle"
+                  :src="entry.imageTitle"
+                  :alt="entry.titleAlt"
                   class="game-block__title fade-seq"
                   :ref="setFadeTarget"
                 />
+                <h3
+                  v-else
+                  class="game-block__title game-block__text-title fade-seq"
+                  :ref="setFadeTarget"
+                >
+                  {{ entry.textTitle }}
+                </h3>
                 <img
                   :src="gameButton"
                   alt="点击进入"
@@ -141,12 +166,8 @@ onBeforeUnmount(() => {
                   :ref="setFadeTarget"
                 />
               </div>
-            </button>
-
-            <div v-else class="game-block__playground" aria-label="竹艺连连看小游戏">
-              <LinkGame />
-            </div>
-          </transition>
+            </router-link>
+          </div>
         </section>
       </div>
     </main>
@@ -154,6 +175,12 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+@font-face {
+  font-family: 'GameEntryTitle';
+  src: url('@/assets/Fonts/ZiTiQuanXinYiJiXiangSong-2 字体圈欣意吉祥宋 Regular.ttf') format('truetype');
+  font-display: block;
+}
+
 .test-page {
   width: 100vw;
   min-height: 100vh;
@@ -254,17 +281,29 @@ onBeforeUnmount(() => {
   height: auto;
 }
 
-.game-block__entry {
-  position: relative;
+.game-block__entries {
   width: 100vw;
   height: 980px;
   margin-top: 140px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 80px;
+  padding: 0 120px;
+  box-sizing: border-box;
+}
+
+.game-block__entry {
+  position: relative;
+  flex: 0 0 calc((100vw - 320px) / 2);
+  height: 100%;
   display: block;
   border: 0;
   padding: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .game-block__entry:focus-visible {
@@ -273,22 +312,24 @@ onBeforeUnmount(() => {
 
 .game-block__stack {
   position: absolute;
-  left: 50%;
+  left: 0;
   bottom: 300px;
-  width: 45%;
-  transform: translateX(-50%);
+  width: 100%;
+  transform: none;
   transition: transform 0.28s ease;
 }
 
 .game-block__entry:hover .game-block__stack,
 .game-block__entry:focus-visible .game-block__stack {
-  transform: translateX(-50%) translateY(-5px);
+  transform: translateY(-5px);
 }
 
 .game-block__preview {
   display: block;
   width: 100%;
-  height: auto;
+  aspect-ratio: 1821 / 1690;
+  height: calc(((100vw - 320px) / 2) * 1690 / 1821);
+  object-fit: contain;
   filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.34));
 }
 
@@ -296,10 +337,24 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 50%;
   top: 60%;
-  width: 62%;
+  width: auto;
+  height: clamp(76px, 6.6vw, 128px);
   transform: translate(-50%, -50%);
-  height: auto;
+  max-width: 72%;
+  object-fit: contain;
   z-index: 2;
+}
+
+.game-block__text-title {
+  margin: 0;
+  width: 72%;
+  color: rgb(205, 232, 229);
+  font-family: 'GameEntryTitle', serif;
+  font-size: clamp(46px, 4.4vw, 82px);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .game-block__cta {
@@ -311,6 +366,31 @@ onBeforeUnmount(() => {
   width: 180px;
   height: auto;
   z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .game-block__entries {
+    height: auto;
+    min-height: 980px;
+    flex-direction: column;
+    align-items: center;
+    gap: 64px;
+    padding: 0 24px 120px;
+  }
+
+  .game-block__entry {
+    width: min(86vw, 560px);
+    height: 520px;
+    flex: none;
+  }
+
+  .game-block__stack {
+    bottom: 0;
+  }
+
+  .game-block__preview {
+    height: calc(min(86vw, 560px) * 1690 / 1821);
+  }
 }
 
 .game-block__playground {

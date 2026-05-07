@@ -3,12 +3,16 @@ import test from "@/views/test.vue"
 import lab from "@/views/lab.vue"
 import show from "@/views/show.vue"
 import history from "@/views/history.vue"
+import bambooGame from "@/views/bambooGame.vue"
+import workshopGame from "@/views/workshopGame.vue"
 
 const routes = [
   { path: '/', component: test },
   { path: '/lab', component: lab },
   { path: '/show', component: show },
-  { path: '/history', component: history }
+  { path: '/history', component: history },
+  { path: '/bamboo-game', component: bambooGame },
+  { path: '/workshop-game', component: workshopGame }
 ]
 
 const router = createRouter({

@@ -38,10 +38,18 @@ import toolPointed from '@/assets/Workshop/其他页面/工具栏/尖头刀.png'
 import brushToolAsset from '@/assets/Workshop/其他页面/工具栏/毛笔.png'
 import sandpaperToolAsset from '@/assets/Workshop/其他页面/工具栏/砂纸.png'
 import sandpaperDraggedAsset from '@/assets/Workshop/其他页面/工具栏/砂纸拖出后.png'
+import introVideoAsset from '@/assets/Workshop/点击“开始游戏”按钮后播放.mov'
+import introGuideAsset from '@/assets/Workshop/对话框.png'
 
 defineOptions({ name: 'WorkshopGame' })
 
 const PREP_STEPS = ['修竹', '煮竹', '晾干', '制坯']
+
+const introGuideParagraphs = [
+  '欢迎来到竹艺工坊，我是你们的竹刻师傅，痴迷于将寻常竹材，刻出万千意趣。',
+  '竹刻是一门藏着东方雅致的传统工艺，以竹为纸、以刀为笔，甄选纹理细密、质地坚韧的老竹，经选材、修竹、描样、雕刻、打磨、上蜡六道工序，将山水、花鸟、诗文等意象，细细镌刻于竹身之上，既保留竹的天然肌理，又赋予其人文温度，一刀一凿间，皆是时光与匠心的沉淀。',
+  '接下来就随我体验竹刻工艺，触碰竹的温润，感受刻刀下的匠心之美。',
+]
 
 const materialCards = [
   { id: 'A', name: '竹片A', image: bambooA, detail: '有裂纹' },
@@ -222,6 +230,13 @@ const guideMasks = {
 }
 
 const currentStage = ref('intro')
+const introVideoPlaying = ref(false)
+const introGuideVisible = ref(false)
+const introGuideStep = ref(0)
+const introGuideTypedParagraphs = ref(introGuideParagraphs.map(() => ''))
+const introGuideAnimating = ref(false)
+const introGuideFading = ref(false)
+const stageTransitionVisible = ref(false)
 const hoveredMaterialId = ref('')
 const hoveredShelfToolId = ref('')
 const selectedMaterialId = ref('')
@@ -436,6 +451,12 @@ function queueTimeout(callback, delay) {
   return id
 }
 
+function waitForIntroGuide(delay) {
+  return new Promise(resolve => {
+    queueTimeout(resolve, delay)
+  })
+}
+
 function clearQueuedTimers() {
   queuedTimers.forEach(id => window.clearTimeout(id))
   queuedTimers.clear()
@@ -471,6 +492,13 @@ function handleShelfToolClick(item) {
 function resetWorkshop() {
   clearQueuedTimers()
   resetPointerState()
+  introVideoPlaying.value = false
+  introGuideVisible.value = false
+  introGuideStep.value = 0
+  introGuideTypedParagraphs.value = introGuideParagraphs.map(() => '')
+  introGuideAnimating.value = false
+  introGuideFading.value = false
+  stageTransitionVisible.value = false
   hoveredShelfToolId.value = ''
   resetSelectionState()
   toolSelected.value = false
@@ -521,9 +549,63 @@ function enterStage(stage) {
   if (stage === 'sketch' || stage === 'edge') ensureGuideMasksLoaded()
 }
 
+function enterStageWithBlackTransition(stage) {
+  stageTransitionVisible.value = true
+
+  queueTimeout(() => {
+    enterStage(stage)
+
+    queueTimeout(() => {
+      stageTransitionVisible.value = false
+    }, 360)
+  }, 360)
+}
+
 async function startWorkshop() {
   await preloadStageAssets()
   enterStage('select')
+}
+
+function playIntroVideo() {
+  introGuideStep.value = 0
+  introGuideTypedParagraphs.value = introGuideParagraphs.map(() => '')
+  introGuideAnimating.value = false
+  introGuideFading.value = false
+  introGuideVisible.value = false
+  introVideoPlaying.value = true
+}
+
+function finishIntroVideo() {
+  if (!introVideoPlaying.value) return
+  introVideoPlaying.value = false
+  introGuideVisible.value = true
+  introGuideStep.value = 0
+}
+
+async function advanceIntroGuide() {
+  if (introGuideAnimating.value || introGuideFading.value) return
+
+  if (introGuideStep.value >= introGuideParagraphs.length) {
+    await waitForIntroGuide(2000)
+    introGuideFading.value = true
+    await waitForIntroGuide(1000)
+    introGuideVisible.value = false
+    introGuideFading.value = false
+    await startWorkshop()
+    return
+  }
+
+  const paragraphIndex = introGuideStep.value
+  const paragraph = introGuideParagraphs[paragraphIndex]
+  introGuideStep.value += 1
+  introGuideAnimating.value = true
+
+  for (let charIndex = 1; charIndex <= paragraph.length; charIndex += 1) {
+    introGuideTypedParagraphs.value[paragraphIndex] = paragraph.slice(0, charIndex)
+    await waitForIntroGuide(32)
+  }
+
+  introGuideAnimating.value = false
 }
 
 function preloadImage(src) {
@@ -739,7 +821,7 @@ function completeStage(successText, nextStage) {
   toolSelected.value = false
   setStageMessage(successText, 'success')
   playFeedbackTone('success')
-  queueTimeout(() => enterStage(nextStage), 1000)
+  queueTimeout(() => enterStageWithBlackTransition(nextStage), 1000)
 }
 
 function accumulateTimedProgress(progressRef, point, distanceDelta, deltaTime, validator, durationMs = 3200) {
@@ -930,7 +1012,7 @@ function handlePrepVideoEnded() {
   if (currentStage.value !== 'select' || selectionPhase.value !== 'preparing') return
   prepVideoProgress.value = 1
   setStageMessage('竹料准备完成', 'success')
-  queueTimeout(() => enterStage('polish'), 700)
+  queueTimeout(() => enterStageWithBlackTransition('polish'), 700)
 }
 
 function handlePrepVideoProgress(event) {
@@ -980,13 +1062,52 @@ onBeforeUnmount(() => clearQueuedTimers())
     </div>
 
     <div v-if="currentStage === 'intro'" class="intro-view">
-      <button class="intro-start-btn" @click="startWorkshop">
+      <button class="intro-start-btn" @click="playIntroVideo">
         <span class="sr-only">开始游戏</span>
       </button>
     </div>
 
+    <div v-if="introVideoPlaying" class="intro-video-layer" aria-label="工坊开场动画">
+      <video
+        class="intro-video"
+        :src="introVideoAsset"
+        autoplay
+        playsinline
+        @ended="finishIntroVideo"
+        @error="finishIntroVideo"
+      ></video>
+    </div>
+
+    <button
+      v-if="introGuideVisible"
+      type="button"
+      class="intro-guide-layer"
+      :class="{ 'is-fading': introGuideFading }"
+      aria-label="竹艺工坊引导"
+      @click="advanceIntroGuide"
+    >
+      <span class="intro-guide__stage-bg" aria-hidden="true">
+        <span class="intro-guide__shelf-bg"></span>
+        <span class="intro-guide__main-bg"></span>
+      </span>
+      <span class="intro-guide__shade" aria-hidden="true"></span>
+      <span class="intro-guide__panel">
+        <img :src="introGuideAsset" alt="" aria-hidden="true" class="intro-guide__asset" />
+        <span class="intro-guide__copy">
+          <span
+            v-for="(paragraph, index) in introGuideTypedParagraphs"
+            :key="introGuideParagraphs[index]"
+            class="intro-guide__paragraph"
+            :class="{ 'is-visible': index < introGuideStep }"
+          >
+            {{ paragraph }}
+          </span>
+        </span>
+      </span>
+    </button>
+
     <div
-      v-else
+      v-else-if="currentStage !== 'intro'"
       class="stage-layout"
       :class="{ 'stage-layout--selection': currentStage === 'select' }"
     >
@@ -1261,6 +1382,12 @@ onBeforeUnmount(() => clearQueuedTimers())
         </aside>
       </div>
     </div>
+
+    <div
+      class="stage-black-transition"
+      :class="{ 'is-visible': stageTransitionVisible }"
+      aria-hidden="true"
+    ></div>
   </div>
 </template>
 
@@ -1406,6 +1533,149 @@ onBeforeUnmount(() => clearQueuedTimers())
 .intro-start-btn:hover {
   transform: scale(1.02);
   filter: brightness(1.08) drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+}
+
+.intro-video-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.intro-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.intro-guide-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  display: block;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: #eee5c2;
+  cursor: pointer;
+  text-align: left;
+}
+
+.intro-guide__stage-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.intro-guide__shelf-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 165px;
+  background: url('@/assets/Workshop/其他页面/background_1.png') center top / cover no-repeat;
+}
+
+.intro-guide__main-bg {
+  position: absolute;
+  top: 165px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('@/assets/Workshop/其他页面/background_2.png') center top / cover no-repeat;
+}
+
+.intro-guide__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000;
+  opacity: 0.5;
+  transition: opacity 1s ease;
+}
+
+.intro-guide__panel {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 0;
+  width: min(92vw, 1380px);
+  aspect-ratio: 2445 / 805;
+  transform: translateX(-50%);
+}
+
+.intro-guide__asset {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+
+.intro-guide__copy {
+  position: absolute;
+  left: 31.5%;
+  top: 62.5%;
+  width: 63%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #eee5c2;
+  font-family: 'WorkshopTitle', '字体圈欣意吉祥宋', serif;
+  font-size: 15px;
+  line-height: 21px;
+  letter-spacing: 0;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+
+.intro-guide__paragraph {
+  display: block;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.intro-guide__paragraph.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-guide-layer.is-fading .intro-guide__shade {
+  opacity: 0;
+}
+
+.intro-guide-layer.is-fading .intro-guide__asset,
+.intro-guide-layer.is-fading .intro-guide__copy {
+  opacity: 0;
+}
+
+.stage-black-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.36s ease;
+}
+
+.stage-black-transition.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 @keyframes introBreathe {

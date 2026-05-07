@@ -36,9 +36,14 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import pageBackground from '@/assets/part2/background.png'
 import titleImage from '@/assets/part2/title_1.png'
 
-import work1 from '@/assets/part2/1.jpg'
-import work2 from '@/assets/part2/2.jpg'
-import work3 from '@/assets/part2/3.jpg'
+import work1 from '@/assets/part2/1.png'
+import work2 from '@/assets/part2/2.png'
+import work3 from '@/assets/part2/3.png'
+import work4 from '@/assets/part2/4.png'
+import qrCode1 from '@/assets/part2/mini program code_1.jpg'
+import qrCode2 from '@/assets/part2/mini program code_2.jpg'
+import qrCode3 from '@/assets/part2/mini program code_3.jpg'
+import qrCode4 from '@/assets/part2/mini program code_4.jpg'
 
 import illustration1 from '@/assets/part2/illustration_1.png'
 import illustration1Hover from '@/assets/part2/illustration_1_1.png'
@@ -52,9 +57,30 @@ import illustration5 from '@/assets/part2/illustration_5.png'
 import illustration5Hover from '@/assets/part2/illustration_5_1.png'
 
 const works = [
-  { src: work1, alt: '竹刻作品一' },
-  { src: work2, alt: '竹刻作品二' },
-  { src: work3, alt: '竹刻作品三' },
+  {
+    src: work1,
+    qrCode: qrCode1,
+    name: '《清无款竹雕采药老人》',
+    alt: '清无款竹雕采药老人',
+  },
+  {
+    src: work2,
+    qrCode: qrCode2,
+    name: '《竹雕蜂猴笔架》',
+    alt: '竹雕蜂猴笔架',
+  },
+  {
+    src: work3,
+    qrCode: qrCode3,
+    name: '《“三松泉石”竹雕松树纹笔筒》',
+    alt: '三松泉石竹雕松树纹笔筒',
+  },
+  {
+    src: work4,
+    qrCode: qrCode4,
+    name: '《竹根雕三多如意》',
+    alt: '竹根雕三多如意',
+  },
 ]
 
 const createIllustration = (
@@ -196,13 +222,12 @@ onBeforeUnmount(() => {
       <section class="works-section" aria-label="作品展示">
         <div class="works-row">
           <article v-for="item in works" :key="item.alt" class="work-card">
-            <img :src="item.src" :alt="item.alt" class="work-image" />
+            <div class="work-visual" tabindex="0">
+              <img :src="item.src" :alt="item.alt" class="work-image" />
+              <img :src="item.qrCode" :alt="`${item.alt}二维码`" class="work-qr" />
+            </div>
+            <p class="work-name">{{ item.name }}</p>
           </article>
-        </div>
-
-        <div class="dots-row" aria-hidden="true">
-          <span class="dot dot--active"></span>
-          <span v-for="index in 4" :key="index" class="dot"></span>
         </div>
       </section>
 
@@ -273,6 +298,12 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+@font-face {
+  font-family: 'WorkNameTitle';
+  src: url('@/assets/Fonts/ZiTiQuanXinYiJiXiangSong-2 字体圈欣意吉祥宋 Regular.ttf') format('truetype');
+  font-display: block;
+}
+
 .lab-page {
   width: 100vw;
   min-height: 200vh;
@@ -298,47 +329,88 @@ onBeforeUnmount(() => {
 }
 
 .works-row {
-  padding-top:100px;
+  padding: 100px 120px 0;
   width: 100vw;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 0;
+  gap: clamp(60px, 3.8vw, 70px);
+  box-sizing: border-box;
 }
 
 .work-card {
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  min-width: 0;
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.work-image {
-  display: block;
-  height: 405px;   /* 三张图统一高度 */
-  width: auto;     /* 宽度按比例自动算 */
-  max-width: none;
-  object-fit: contain;
-}
-
-.dots-row {
+.work-visual {
+  position: relative;
+  width: 100%;
+  height: 405px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  margin-top: 50px;
+  overflow: visible;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  border-radius: 50%;
-  background: transparent;
+.work-visual:focus-visible {
+  outline: none;
 }
 
-.dot--active {
-  background: #fff;
-  border-color: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.42);
+.work-image,
+.work-qr {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.55s ease,
+    filter 0.55s ease;
+  will-change: opacity;
+}
+
+.work-image {
+  max-width: min(100%, 410px);
+  max-height: 405px;
+  width: auto;
+  height: auto;
+  opacity: 1;
+}
+
+.work-qr {
+  width: 278px;
+  height: 278px;
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.work-card:hover .work-image,
+.work-card:focus-within .work-image {
+  opacity: 0;
+}
+
+.work-card:hover .work-qr,
+.work-card:focus-within .work-qr {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.work-name {
+  margin: 28px 0 0;
+  min-height: 24px;
+  color: #c0d6d2;
+  font-family: 'WorkNameTitle', serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .teaching-section {
